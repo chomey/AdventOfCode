@@ -1,3 +1,5 @@
+package y2018;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -65,5 +67,26 @@ public class P4 {
 		}
 
 		System.out.println("Time: " + minute);
+
+		int currMax = 0;
+		maxTime = 0;
+		currGuard = null;
+		for (String guard : guardToMinuteToSleep.keySet()) {
+			int guardMax = 0;
+			int guardTime = 0;
+			for (int i = 0; i < 60; i++) {
+				if (guardToMinuteToSleep.get(guard)[i] > guardMax) {
+					guardMax = guardToMinuteToSleep.get(guard)[i];
+					guardTime = i;
+				}
+			}
+			if (guardMax > currMax) {
+				currGuard = guard;
+				currMax = guardMax;
+				maxTime = guardTime;
+			}
+		}
+
+		System.out.println(currGuard + " " + maxTime);
 	}
 }

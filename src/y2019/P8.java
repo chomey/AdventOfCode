@@ -71,10 +71,10 @@ public class P8 {
 		}
 		for(int[] row : finalImage){
 			for(int i : row){
-				if(i == 0){
-					System.out.print(" ");
-				} else {
+				if(i == 1){
 					System.out.print(i);
+				} else {
+					System.out.print(" ");
 				}
 			}
 			System.out.println();

@@ -1,5 +1,7 @@
 package y2019;
 
+import lombok.Data;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,37 +17,82 @@ public class P10 {
 			inString.add(line);
 			line = br.readLine();
 		}
-		boolean[][] asteroids = new boolean[inString.size()][inString.get(0).length()];
-		for (int i = 0; i < inString.size(); i++) {
-			String inLine = inString.get(i);
-			for (int j = 0; j < inLine.length(); j++) {
-				asteroids[j][i] = inLine.charAt(j) == '#';
+		Set<Point> asteroids = new HashSet<>();
+		for (int y = 0; y < inString.size(); y++) {
+			String inLine = inString.get(y);
+			for (int x = 0; x < inLine.length(); x++) {
+				if (inLine.charAt(x) == '#') {
+					asteroids.add(new Point(x, y));
+				}
 			}
 		}
 		int max = 0;
-		for (int x1 = 0; x1 < asteroids.length; x1++) {
-			for (int y1 = 0; y1 < asteroids[x1].length; y1++) {
-				if (!asteroids[x1][y1]) {
+		int x = 0;
+		int y = 0;
+		TreeMap<Double, Set<Point>> maxRadiansToPoint = new TreeMap<>();
+		for (Point p : asteroids) {
+			for (Point otherP : asteroids) {
+				if (p == otherP) {
 					continue;
 				}
-				Set<Double> radians = new TreeSet<>();
-				for (int x2 = 0; x2 < asteroids.length; x2++) {
-					for (int y2 = 0; y2 < asteroids[x2].length; y2++) {
-						if (x1 == x2 && y1 == y2) {
-							continue;
-						}
-						if (!asteroids[x2][y2]) {
-							continue;
-						}
-						radians.add(Math.atan2(y2 - y1, x2 - x1));
-					}
+				TreeMap<Double, Set<Point>> radiansToPoint = new TreeMap<>();
+				double radian = Math.atan2(p.y - otherP.y, otherP.x - p.x);
+				radiansToPoint.putIfAbsent(radian, new HashSet<>());
+				radiansToPoint.get(radian).add(otherP);
+			}
+			TreeMap<Double, Set<Point>> radiansToPoint = new TreeMap<>();
+			asteroids.forEach(otherP -> {
+				if (p != otherP) {
+					double radian = Math.atan2(p.y - otherP.y, otherP.x - p.x);
+					radiansToPoint.putIfAbsent(radian, new HashSet<>());
+					radiansToPoint.get(radian).add(otherP);
 				}
-				if (radians.size() > max) {
-					max = radians.size();
-					System.out.println(x1 + " " + y1);
-				}
+			});
+			if (radiansToPoint.size() > max) {
+				max = radiansToPoint.size();
+				maxRadiansToPoint = radiansToPoint;
+				x = p.x;
+				y = p.y;
 			}
 		}
-		System.out.println(max);
+		System.out.println("Max: (" + x + "," + y + ")");
+		Iterator<Double> iter = maxRadiansToPoint.descendingKeySet().iterator();
+		int count = 0;
+		boolean firstPass = true;
+		while (iter.hasNext()) {
+			Double next = iter.next();
+			if (!firstPass || next <= Math.PI / 2) {
+				count++;
+			}
+			if (count == 200) {
+				Point p = closestPoint(x, y, maxRadiansToPoint.get(next));
+				System.out.println(p.x * 100 + p.y);
+				return;
+			}
+			//Iterate until end. Reset iterator since it's going to be in the 2nd quadrant
+			if(!iter.hasNext()) {
+				iter = maxRadiansToPoint.descendingKeySet().iterator();
+				firstPass = false;
+			}
+		}
+	}
+
+	private static Point closestPoint(int x, int y, Set<Point> points) {
+		double minDistance = Double.MAX_VALUE;
+		Point closestPoint = null;
+		for (Point p : points) {
+			double distance = Math.sqrt(Math.pow(p.y - y, 2) + Math.pow(p.x - x, 2));
+			if (distance < minDistance) {
+				minDistance = distance;
+				closestPoint = p;
+			}
+		}
+		return closestPoint;
+	}
+
+	@Data
+	public static class Point {
+		final int x;
+		final int y;
 	}
 }

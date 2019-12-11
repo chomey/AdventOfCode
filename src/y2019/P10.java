@@ -31,22 +31,11 @@ public class P10 {
 		int y = 0;
 		TreeMap<Double, Set<Point>> maxRadiansToPoint = new TreeMap<>();
 		for (Point p : asteroids) {
-			for (Point otherP : asteroids) {
-				if (p == otherP) {
-					continue;
-				}
-				TreeMap<Double, Set<Point>> radiansToPoint = new TreeMap<>();
+			TreeMap<Double, Set<Point>> radiansToPoint = new TreeMap<>();
+			asteroids.stream().filter(otherP -> p != otherP).forEach(otherP -> {
 				double radian = Math.atan2(p.y - otherP.y, otherP.x - p.x);
 				radiansToPoint.putIfAbsent(radian, new HashSet<>());
 				radiansToPoint.get(radian).add(otherP);
-			}
-			TreeMap<Double, Set<Point>> radiansToPoint = new TreeMap<>();
-			asteroids.forEach(otherP -> {
-				if (p != otherP) {
-					double radian = Math.atan2(p.y - otherP.y, otherP.x - p.x);
-					radiansToPoint.putIfAbsent(radian, new HashSet<>());
-					radiansToPoint.get(radian).add(otherP);
-				}
 			});
 			if (radiansToPoint.size() > max) {
 				max = radiansToPoint.size();
@@ -70,7 +59,7 @@ public class P10 {
 				return;
 			}
 			//Iterate until end. Reset iterator since it's going to be in the 2nd quadrant
-			if(!iter.hasNext()) {
+			if (!iter.hasNext()) {
 				iter = maxRadiansToPoint.descendingKeySet().iterator();
 				firstPass = false;
 			}

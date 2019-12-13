@@ -93,13 +93,4 @@ public class P12b {
 			this.position.z += velocity.z;
 		}
 	}
-
-
-	@Data
-	@AllArgsConstructor
-	public static class Tuple {
-		int x;
-		int y;
-		int z;
-	}
 }

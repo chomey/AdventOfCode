@@ -203,12 +203,6 @@ public class P11 {
 		throw new RuntimeException("no happen");
 	}
 
-	@Data
-	public static class Point {
-		final int x;
-		final int y;
-	}
-
 	@RequiredArgsConstructor
 	public enum Direction {
 		LEFT(new Point(0, -1), new Point(0, 1)),

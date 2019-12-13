@@ -1,7 +1,5 @@
 package y2019;
 
-import lombok.Data;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -77,11 +75,5 @@ public class P10 {
 			}
 		}
 		return closestPoint;
-	}
-
-	@Data
-	public static class Point {
-		final int x;
-		final int y;
 	}
 }

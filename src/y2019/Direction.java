@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public enum Direction {
-	LEFT(1, -1, 0), RIGHT(2, 1, 0), UP(3, 0, 1), DOWN(4, 0, -1);
+	LEFT(1, -1, 0), RIGHT(2, 1, 0), UP(3, 0, -1), DOWN(4, 0, 1);
 
 	final int code;
 	final int xDelta;

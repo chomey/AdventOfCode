@@ -26,8 +26,7 @@ public class Intcode {
 				//Only happens when you're literally at the end of array
 			}
 			switch (opcode) {
-				//Add
-				case 1:
+				case 1: //Add
 					index = (int) values[i + 3];
 					if (thirdMode == 2) {
 						index += base;
@@ -35,8 +34,7 @@ public class Intcode {
 					values[index] = firstValue + secondValue;
 					i += 4;
 					break;
-				//Multiply
-				case 2:
+				case 2: //Multiply
 					index = (int) values[i + 3];
 					if (thirdMode == 2) {
 						index += base;
@@ -44,39 +42,35 @@ public class Intcode {
 					values[index] = firstValue * secondValue;
 					i += 4;
 					break;
-				//Write input
-				case 3:
+				case 3: //Input
 					index = (int) values[i + 1];
-					if (thirdMode == 2) {
+					if (firstMode == 2) {
 						index += base;
 					}
-					values[index] = 1;//replace with input
+					values[index] = 1;
+					//TODO: INPUT
 					i += 2;
 					break;
-				//Print
-				case 4:
+				case 4: //Output
 					int outputVal = firstValue.intValue();
-					//Do something with output
+					//TODO: OUTPUT
 					i += 2;
 					break;
-				//Jump if true
-				case 5:
+				case 5: //Jump if true
 					if (firstValue != 0) {
 						i = secondValue.intValue();
 					} else {
 						i += 3;
 					}
 					break;
-				//Jump if false
-				case 6:
+				case 6: //Jump if false
 					if (firstValue == 0) {
 						i = secondValue.intValue();
 					} else {
 						i += 3;
 					}
 					break;
-				//Less than
-				case 7:
+				case 7: //Less than
 					index = (int) values[i + 3];
 					if (thirdMode == 2) {
 						index += base;
@@ -88,8 +82,7 @@ public class Intcode {
 					}
 					i += 4;
 					break;
-				//Equals
-				case 8:
+				case 8: //Equals
 					index = (int) values[i + 3];
 					if (thirdMode == 2) {
 						index += base;
@@ -101,11 +94,11 @@ public class Intcode {
 					}
 					i += 4;
 					break;
-				case 9:
+				case 9: //Change base
 					base += firstValue;
 					i += 2;
 					break;
-				case 99:
+				case 99: //End
 					break Loop;
 				default:
 					throw new RuntimeException("this shouldn't happen");

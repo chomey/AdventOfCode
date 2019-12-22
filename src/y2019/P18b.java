@@ -4,7 +4,7 @@ import lombok.Data;
 
 import java.util.*;
 
-public class P18 {
+public class P18b {
 	public static void main(String[] args) {
 		String inputStr = "#################################################################################\n" +
 				                  "#.........#.............#.......#.....#.#.....................#...#..c#.........#\n" +
@@ -45,9 +45,9 @@ public class P18 {
 				                  "#####.#.###.#######.#.#.#.#.#.#.#.#.#####.###########.###.###.#.###############.#\n" +
 				                  "#.....#.#.#.......#.#...#.#.#...#.#.....#...#.......#.#.#.#...#.....#.#.....#...#\n" +
 				                  "#.#####.#.#######.#.#####.#.#####.#####.#.#.#.###.###.#.#.#.#######.#.#.###.#.###\n" +
-				                  "#............v..#.........#.....#.........#.....#.......#...........#.....#.....#\n" +
-				                  "#######################################.@.#######################################\n" +
-				                  "#.#.....G.....#.....#.......#.........#.........#.......#...........#.......#...#\n" +
+				                  "#............v..#.........#.....#......@#@#.....#.......#...........#.....#.....#\n" +
+				                  "#################################################################################\n" +
+				                  "#.#.....G.....#.....#.......#.........#@#@......#.......#...........#.......#...#\n" +
 				                  "#.#.###.#####.#####.#.#####.#.###.###.#.#.#####.#####.#.#######.###.#.###.#.###.#\n" +
 				                  "#.#.#.#.....#.......#.#...#...#.#.#.....#.#...#......a#.......#...#.#.#...#.#...#\n" +
 				                  "#.#.#.#####.#######.#.#.#.#####.#.#####.#.#.#.###############.###.#.#.#.###.#.#.#\n" +
@@ -103,7 +103,7 @@ public class P18 {
 			}
 		}
 
-		PartialState start = new PartialState(find(map, '@').iterator().next(), new HashSet<>());
+		PartialState start = new PartialState(find(map, '@'), new HashSet<>());
 		System.out.println("Found start: " + start);
 
 		Set<PartialState> visited = new HashSet<>();
@@ -113,31 +113,48 @@ public class P18 {
 		search(map, nextSearch, visited, target);
 	}
 
+	static int maxCollected = 0;
+	static long counter = 0;
+
 	private static void search(Map<Point, Character> map, Deque<State> nextSearch, Set<PartialState> visited, int target) {
 		while (nextSearch.size() > 0) {
+			counter++;
 			State state = nextSearch.pollFirst();
-			if (state.partialState.collected.size() == target) {
+			int collected = state.partialState.collected.size();
+			if (counter % 100000 == 0) {
+				System.out.println("Move: " + counter);
+			}
+			if (collected > maxCollected) {
+				maxCollected = collected;
+				System.out.println(String.format("Found %dth on turn %d", maxCollected, counter));
+			}
+			if (collected == target) {
 				System.out.println(state.steps);
 				return;
 			}
-			for (Direction d : Direction.values()) {
-				Point nextPoint = state.partialState.currentLocation.apply(d);
-				PartialState partialState = new PartialState(nextPoint, new HashSet<>(state.partialState.collected));
-				if (isValidNextMove(map, nextPoint) && !visited.contains(partialState)) {
-					Character nextCharacter = map.get(nextPoint);
-					if (nextCharacter == '.' || nextCharacter == '@' || state.partialState.collected.contains((char) (nextCharacter + 32))) {
-						nextSearch.add(new State(partialState, state.steps + 1));
-						visited.add(partialState);
-					} else if ('a' <= nextCharacter && nextCharacter <= 'z') {
-						State newState = new State(partialState, state.steps + 1);
-						newState.partialState.collected.add(nextCharacter);
-						nextSearch.add(newState);
-						visited.add(newState.partialState);
-					} else {
+			for (Point currentLocation : state.partialState.currentLocations) {
+				for (Direction d : Direction.values()) {
+					Point nextPoint = currentLocation.apply(d);
+					Set<Point> currentLocations = new HashSet<>(state.partialState.currentLocations);
+					currentLocations.remove(currentLocation);
+					currentLocations.add(nextPoint);
+					PartialState partialState = new PartialState(currentLocations, new HashSet<>(state.partialState.collected));
+					if (isValidNextMove(map, nextPoint) && !visited.contains(partialState)) {
+						Character nextCharacter = map.get(nextPoint);
+						if (nextCharacter == '.' || nextCharacter == '@' || state.partialState.collected.contains((char) (nextCharacter + 32))) {
+							nextSearch.add(new State(partialState, state.steps + 1));
+							visited.add(partialState);
+						} else if ('a' <= nextCharacter && nextCharacter <= 'z') {
+							State newState = new State(partialState, state.steps + 1);
+							newState.partialState.collected.add(nextCharacter);
+							nextSearch.add(newState);
+							visited.add(newState.partialState);
+						} else {
 //						System.out.println(String.format("(%d,%d) with %s => END FOR %c", state.partialState.currentLocation.x, state.partialState.currentLocation.y, state.partialState.collected, nextCharacter));
-						continue;
-					}
+							continue;
+						}
 //					System.out.println(String.format("(%d,%d) with %s => (%d, %d) FOR %c", state.partialState.currentLocation.x, state.partialState.currentLocation.y, state.partialState.collected, nextPoint.x, nextPoint.y, nextCharacter));
+					}
 				}
 			}
 		}
@@ -164,16 +181,8 @@ public class P18 {
 	}
 
 	@Data
-	static class PartialState implements Comparable<PartialState> {
-		final Point currentLocation;
+	static class PartialState {
+		final Set<Point> currentLocations;
 		final Set<Character> collected;
-
-		@Override
-		public int compareTo(PartialState o) {
-			if (!currentLocation.equals(o.currentLocation)) {
-				return currentLocation.compareTo(o.currentLocation);
-			}
-			return Integer.compare(collected.size(), o.collected.size());
-		}
 	}
 }

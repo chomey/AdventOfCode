@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class P18a {
+public class P19b {
 	static int inputArryLength;
 
 	public static void main(String[] args) {
@@ -14,24 +14,35 @@ public class P18a {
 		inputArryLength = inputArr.length;
 
 		Map<Point, Boolean> state = new HashMap<>();
-		int xInit = 2955;
-		int yInit = 5199;
-		for (int x = xInit; x < xInit + 100; x++) {
-			System.out.println();
-			for (int y = yInit; y < yInit + 100; y++) {
-				long[] values = new long[inputArr.length + 10000];
-				for (int i = 0; i < inputArr.length; i++) {
-					values[i] = Long.parseLong(inputArr[i]);
+		for (int x = 500; x < 1500; x++) {
+			for (int y = 500; y < 1500; y++) {
+				if (!runOn(state, inputArr, x, y)) {
+					continue;
 				}
-				AtomicInteger index = new AtomicInteger();
-				Intcode intcode = new Intcode(values, supplier(new long[]{y, x}, index), consumer(state, x, y));
-				intcode.run();
-				Boolean isTrue = state.get(new Point(x, y));
-				System.out.print(isTrue ? "#" : ".");
+				if (!runOn(state, inputArr, x + 99, y)) {
+					continue;
+				}
+				if (!runOn(state, inputArr, x, y + 99)) {
+					continue;
+				}
+				if (!runOn(state, inputArr, x + 99, y + 99)) {
+					continue;
+				}
+				System.out.println(10000 * x + y);
+				return;
 			}
-			System.out.println();
 		}
-		System.out.println(state.values().stream().filter(v -> v).count());
+	}
+
+	private static boolean runOn(Map<Point, Boolean> state, String[] inputArr, int x, int y) {
+		long[] values = new long[inputArr.length + 10000];
+		for (int i = 0; i < inputArr.length; i++) {
+			values[i] = Long.parseLong(inputArr[i]);
+		}
+		AtomicInteger index = new AtomicInteger();
+		Intcode intcode = new Intcode(values, supplier(new long[]{x, y}, index), consumer(state, x, y));
+		intcode.run();
+		return state.get(new Point(x, y));
 	}
 
 	private static Consumer<Long> consumer(Map<Point, Boolean> state, int x, int y) {

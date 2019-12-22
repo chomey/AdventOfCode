@@ -1,6 +1,7 @@
 package y2019;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.*;
 
@@ -103,41 +104,38 @@ public class P18 {
 			}
 		}
 
-		PartialState start = new PartialState(find(map, '@').iterator().next(), new HashSet<>());
+		State start = new State(find(map, '@').iterator().next(), new HashSet<>(), 0);
 		System.out.println("Found start: " + start);
 
-		Set<PartialState> visited = new HashSet<>();
+		Set<State> visited = new HashSet<>();
 		visited.add(start);
 		ArrayDeque<State> nextSearch = new ArrayDeque<>();
-		nextSearch.add(new State(start, 0));
+		nextSearch.add(start);
 		search(map, nextSearch, visited, target);
 	}
 
-	private static void search(Map<Point, Character> map, Deque<State> nextSearch, Set<PartialState> visited, int target) {
+	private static void search(Map<Point, Character> map, Deque<State> nextSearch, Set<State> visited, int target) {
 		while (nextSearch.size() > 0) {
 			State state = nextSearch.pollFirst();
-			if (state.partialState.collected.size() == target) {
+			if (state.collected.size() == target) {
 				System.out.println(state.steps);
 				return;
 			}
 			for (Direction d : Direction.values()) {
-				Point nextPoint = state.partialState.currentLocation.apply(d);
-				PartialState partialState = new PartialState(nextPoint, new HashSet<>(state.partialState.collected));
-				if (isValidNextMove(map, nextPoint) && !visited.contains(partialState)) {
+				Point nextPoint = state.currentLocation.apply(d);
+				State newState = new State(nextPoint, new HashSet<>(state.collected), state.steps + 1);
+				if (isValidNextMove(map, nextPoint) && !visited.contains(newState)) {
 					Character nextCharacter = map.get(nextPoint);
-					if (nextCharacter == '.' || nextCharacter == '@' || state.partialState.collected.contains((char) (nextCharacter + 32))) {
-						nextSearch.add(new State(partialState, state.steps + 1));
-						visited.add(partialState);
-					} else if ('a' <= nextCharacter && nextCharacter <= 'z') {
-						State newState = new State(partialState, state.steps + 1);
-						newState.partialState.collected.add(nextCharacter);
+					if (nextCharacter == '.' || nextCharacter == '@' || state.collected.contains((char) (nextCharacter + 32))) {
 						nextSearch.add(newState);
-						visited.add(newState.partialState);
+						visited.add(newState);
+					} else if ('a' <= nextCharacter && nextCharacter <= 'z') {
+						newState.collected.add(nextCharacter);
+						nextSearch.add(newState);
+						visited.add(newState);
 					} else {
-//						System.out.println(String.format("(%d,%d) with %s => END FOR %c", state.partialState.currentLocation.x, state.partialState.currentLocation.y, state.partialState.collected, nextCharacter));
 						continue;
 					}
-//					System.out.println(String.format("(%d,%d) with %s => (%d, %d) FOR %c", state.partialState.currentLocation.x, state.partialState.currentLocation.y, state.partialState.collected, nextPoint.x, nextPoint.y, nextCharacter));
 				}
 			}
 		}
@@ -159,21 +157,8 @@ public class P18 {
 
 	@Data
 	static class State {
-		final PartialState partialState;
-		final int steps;
-	}
-
-	@Data
-	static class PartialState implements Comparable<PartialState> {
 		final Point currentLocation;
 		final Set<Character> collected;
-
-		@Override
-		public int compareTo(PartialState o) {
-			if (!currentLocation.equals(o.currentLocation)) {
-				return currentLocation.compareTo(o.currentLocation);
-			}
-			return Integer.compare(collected.size(), o.collected.size());
-		}
+		@EqualsAndHashCode.Exclude final int steps;
 	}
 }

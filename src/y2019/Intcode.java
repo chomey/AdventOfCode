@@ -105,7 +105,7 @@ public class Intcode {
 				case 99: //End
 					break Loop;
 				default:
-					throw new RuntimeException("this shouldn't happen");
+					throw new RuntimeException("this shouldn't happen: " + opcode);
 			}
 		}
 	}

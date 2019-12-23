@@ -1,7 +1,7 @@
 package y2019;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.*;
 
@@ -104,7 +104,7 @@ public class P18 {
 			}
 		}
 
-		State start = new State(find(map, '@').iterator().next(), new HashSet<>(), 0);
+		State start = new State(find(map, '@').iterator().next(), new boolean[26], 0);
 		System.out.println("Found start: " + start);
 
 		Set<State> visited = new HashSet<>();
@@ -117,20 +117,20 @@ public class P18 {
 	private static void search(Map<Point, Character> map, Deque<State> nextSearch, Set<State> visited, int target) {
 		while (nextSearch.size() > 0) {
 			State state = nextSearch.pollFirst();
-			if (state.collected.size() == target) {
+			if (state.numCollected() == target) {
 				System.out.println(state.steps);
 				return;
 			}
 			for (Direction d : Direction.values()) {
 				Point nextPoint = state.currentLocation.apply(d);
-				State newState = new State(nextPoint, new HashSet<>(state.collected), state.steps + 1);
+				State newState = new State(nextPoint, state.collected, state.steps + 1);
 				if (isValidNextMove(map, nextPoint) && !visited.contains(newState)) {
 					Character nextCharacter = map.get(nextPoint);
-					if (nextCharacter == '.' || nextCharacter == '@' || state.collected.contains((char) (nextCharacter + 32))) {
+					if (nextCharacter == '.' || nextCharacter == '@' || keyCollectedFor(state.collected, nextCharacter)) {
 						nextSearch.add(newState);
 						visited.add(newState);
 					} else if ('a' <= nextCharacter && nextCharacter <= 'z') {
-						newState.collected.add(nextCharacter);
+						newState.collected[getIndexFor(nextCharacter)] = true;
 						nextSearch.add(newState);
 						visited.add(newState);
 					} else {
@@ -139,6 +139,17 @@ public class P18 {
 				}
 			}
 		}
+	}
+
+	private static boolean keyCollectedFor(boolean[] collected, Character c) {
+		if ('A' > c || c > 'Z') {
+			return false;
+		}
+		return collected[getIndexFor((char) (c + ('a'-'A')))];
+	}
+
+	private static int getIndexFor(char c) {
+		return c - 'a';
 	}
 
 	private static boolean isValidNextMove(Map<Point, Character> map, Point nextPoint) {
@@ -155,10 +166,26 @@ public class P18 {
 		return result;
 	}
 
-	@Data
+	@EqualsAndHashCode @ToString
 	static class State {
 		final Point currentLocation;
-		final Set<Character> collected;
+		final boolean[] collected = new boolean[26];
 		@EqualsAndHashCode.Exclude final int steps;
+
+		public State(Point currentLocation, boolean[] collected, int steps) {
+			this.currentLocation = currentLocation;
+			System.arraycopy(collected, 0, this.collected, 0, collected.length);
+			this.steps = steps;
+		}
+
+		public int numCollected() {
+			int count = 0;
+			for (int i = 0; i < collected.length; i++) {
+				if (collected[i]) {
+					count++;
+				}
+			}
+			return count;
+		}
 	}
 }

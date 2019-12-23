@@ -57,7 +57,7 @@ public class Intcode {
 					i += 2;
 					break;
 				case 4: //Output
-					consumer.accept((long) firstValue.intValue());
+					consumer.accept(firstValue);
 					i += 2;
 					break;
 				case 5: //Jump if true

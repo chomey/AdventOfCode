@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 @Data
 public class Intcode {
 	final long[] values;
-	final Supplier<Long> input;
+	final Supplier<Long> supplier;
 	final Consumer<Long> consumer;
 	int base = 0;
 
@@ -51,9 +51,7 @@ public class Intcode {
 					if (firstMode == 2) {
 						index += base;
 					}
-					long nextInput = input.get();
-					values[index] = nextInput;
-					//TODO: INPUT
+					values[index] = supplier.get();
 					i += 2;
 					break;
 				case 4: //Output
